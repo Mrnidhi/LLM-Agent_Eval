@@ -1,0 +1,32 @@
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.DS_Store
+
+.env
+app.log
+
+batch_eval_output*.json
+eval_results*.json
+batch_flow_output.json
+batch_flow_output.txt
+
+config.json
+*.egg-info/
+dist/
+build/
+
+# Generated variant configs
+agents/rag/evaluation/configurations/generated/*.yaml
+agents/rag/rag_agent_config.yaml
+agents/rag/variants.json
+
+# IDE
+.idea/
+*.swp
+*.swo
+
+# Agent-specific runtime configs (copied from examples)
+agents/orchestrator/evaluation_orchestrator_agent_config.yaml
+agents/prompt_generator/prompt_generator_config.yaml

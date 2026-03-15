@@ -1,0 +1,13 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Orchestrator",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "llm_eval.orchestrator.orchestrator",
+            "cwd": "${workspaceFolder}",
+            "justMyCode": false
+        }
+    ]
+}

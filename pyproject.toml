@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "llm-eval"
+version = "1.0.0"
+description = "Framework for evaluating and monitoring LLM-based agents"
+requires-python = ">=3.11"
+dependencies = [
+    "azure-ai-documentintelligence>=1.0.0b4",
+    "azure-ai-evaluation>=1.2.0",
+    "azure-identity>=1.19.0",
+    "azure-monitor-opentelemetry>=1.6.2",
+    "azure-monitor-opentelemetry-exporter>=1.0.0b31",
+    "azure-search-documents>=11.5.2",
+    "azure-storage-blob>=12.23.1",
+    "jsonschema>=4.23.0",
+    "langchain>=0.3.4",
+    "langchain-community>=0.3.3",
+    "langchain-openai>=0.2.3",
+    "openai>=1.52.2",
+    "opentelemetry-api>=1.27.0",
+    "opentelemetry-instrumentation-langchain>=0.33.9",
+    "opentelemetry-instrumentation-logging>=0.48b0",
+    "opentelemetry-instrumentation-requests>=0.48b0",
+    "opentelemetry-sdk>=1.27.0",
+    "pandas>=2.2.3",
+    "promptflow>=1.17.2",
+    "promptflow-core>=1.17.2",
+    "python-dotenv>=1.0.1",
+    "PyYAML>=6.0.2",
+    "tenacity>=8.5.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
