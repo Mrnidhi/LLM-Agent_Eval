@@ -1,0 +1,16 @@
+$schema: https://azuremlschemas.azureedge.net/promptflow/latest/flow.schema.json
+description: RAG agent flow
+language: python
+
+additional_includes:
+  - ../../core/
+  - ./
+  - ../
+  - ../..
+
+entry: agent:RAG
+
+environment:
+  docker_image: "python:3.11-slim"
+
+type: chat
