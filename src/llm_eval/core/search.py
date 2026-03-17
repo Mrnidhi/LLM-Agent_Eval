@@ -56,6 +56,7 @@ class AISearch:
                 name="text_vector",
                 type=SearchFieldDataType.Collection(SearchFieldDataType.Single),
                 searchable=True,
+                # Dimension is auto-detected from the embedding model; makes one API call at init
                 vector_search_dimensions=len(self._embeddings.embed_query("Text")),
                 vector_search_profile_name="myHnswProfile",
             ),
@@ -90,6 +91,7 @@ class AISearch:
         self._vector_search.add_documents(documents)
 
     def search(self, query: str, search_type: str = "hybrid", top_k: int = 5) -> str:
+        """Search types: 'similarity', 'hybrid', 'semantic_hybrid', and their _score_threshold variants."""
         logger.info("Searching: query=%s", query)
         with tracer.start_as_current_span("aisearch") as span:
             if not isinstance(query, str) or not query:

@@ -70,16 +70,20 @@ class Orchestrator:
         base_variant: str,
         output_dir: Optional[str] = None,
     ) -> str:
+        """Runs: baseline eval -> generate prompts -> generate variants -> multi-eval -> return results JSON."""
+        # Step 1: Baseline evaluation with current config
         eval_res = run_and_eval_flow(
             agent, eval_fn, agent_config_file_dir, agent_config_file_name, evaluation_dataset, dump_output=False
         )
 
+        # Step 2: Use baseline results to generate improved prompt variants via LLM
         pgen = PromptGenerator(load_agent_configuration(PROMPT_GENERATOR_FOLDER, PROMPT_GENERATOR_CONFIG_FILE))
         evaluated_agent_config = load_agent_configuration(agent_config_file_dir, agent_config_file_name)
         generated_prompts = pgen.generate_prompts(
             evaluated_agent_config["AgentConfiguration"]["chat_system_prompt"], eval_res
         )
 
+        # Step 3: Generate YAML config variants (cartesian product of models, params, prompts)
         try:
             with open(base_variant, "r", encoding="utf-8") as f:
                 variants = json.load(f)
@@ -91,11 +95,13 @@ class Orchestrator:
             logger.exception("Error generating variants: %s", e)
             raise
 
+        # Step 4: Evaluate all generated variants in parallel
         all_results = multi_variant_evaluation(agent, eval_fn, output_dir, evaluation_dataset)
         evaluation_results = json.dumps(all_results, default=self._serializer)
         return evaluation_results
 
     def analyze(self, evaluation_results: str) -> Any:
+        """Uses LLM to review all variant results and pick the best one with reasoning."""
         logger.info("Analyzing evaluation results")
         with tracer.start_as_current_span("Orchestrator.analyze") as span:
             prompt_template = PromptTemplate.from_template(

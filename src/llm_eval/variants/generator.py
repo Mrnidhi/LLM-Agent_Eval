@@ -62,6 +62,7 @@ def load_base_config(base_config_path: str):
 
 
 def float_range(start, end, step):
+    """Inclusive float range. Uses epsilon tolerance to avoid missing the end value due to float drift."""
     vals = []
     current = float(start)
     while current <= end + 1e-9:
@@ -75,6 +76,7 @@ def int_range(start, end, step):
 
 
 def is_active(d):
+    """Variants JSON uses mixed types for 'active' (bool, string, int) -- handle all of them."""
     if "active" not in d:
         return True
     return d["active"] in [True, "true", "True", 1, "1"]
@@ -149,6 +151,7 @@ def build_value_combinations(variants, key_name):
 
 
 def set_prompt_variants(variants: dict, prompt_variants: dict):
+    # The {context} placeholder is required -- it gets filled with retrieved documents at runtime
     prompts = [p["prompt"] + "  \n<context>\n{context}\n</context>" for p in prompt_variants["prompts"]]
     variants["chat_system_prompt"] = prompts
     return variants
@@ -206,6 +209,7 @@ def generate_variants(schema_yaml: str, agent_folder: str, agent_config_file: st
     if not chat_prompts or not isinstance(chat_prompts, list):
         chat_prompts = [agent_conf["chat_system_prompt"]]
 
+    # Cartesian product of all dimensions; truncated to max_variants to cap total configs
     all_combinations = list(product(
         main_deployments, model_param_combinations,
         retrieval_deployments, retrieval_param_combinations, chat_prompts,
@@ -223,6 +227,7 @@ def generate_variants(schema_yaml: str, agent_folder: str, agent_config_file: st
         new_conf = deepcopy(base_config)
         new_agent_conf = new_conf["AgentConfiguration"]
 
+        # deepcopy deployment dicts to avoid cross-variant mutation
         new_agent_conf["deployment"] = deepcopy(dep)
         new_agent_conf["model_parameters"].update(model_params)
         new_agent_conf["retrieval"]["deployment"] = deepcopy(ret_dep)

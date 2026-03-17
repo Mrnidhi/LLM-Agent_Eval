@@ -53,12 +53,16 @@ class RAG:
 
                 self._session_store = SimpleInMemorySessionStore()
 
+                # Step 1: Reformulate the user's latest question into a standalone query
+                # using chat history context (handles follow-up questions like "what about its pricing?")
                 self._user_intent_prompt_template = ChatPromptTemplate.from_messages([
                     ("system", cfg["intent_system_prompt"]),
                     MessagesPlaceholder("chat_history"),
                     ("human", "{input}"),
                 ])
 
+                # If there's no chat_history, input goes directly to the retriever.
+                # Otherwise the LLM reformulates the question first, then retrieves.
                 self._history_aware_user_intent_retriever = create_history_aware_retriever(
                     self.aimodel.llm(),
                     self.aisearch.create_retriever(
@@ -82,6 +86,7 @@ class RAG:
                     self._history_aware_user_intent_retriever, self._question_answer_chain
                 )
 
+                # These keys must match the placeholders in the prompt templates above
                 self._conversational_rag_chain = RunnableWithMessageHistory(
                     self._rag_chain,
                     self.get_session_history,
@@ -108,6 +113,7 @@ class RAG:
         with tracer.start_as_current_span("RAG.chat") as span:
             try:
                 cfg = self.rag_config["AgentConfiguration"]
+                # These span attributes are used by Fabric dashboards to compare evaluations across config versions
                 span.set_attribute("session_id", session_id)
                 span.set_attribute("application_name", cfg["application_name"])
                 span.set_attribute("config_version", cfg["config_version"])

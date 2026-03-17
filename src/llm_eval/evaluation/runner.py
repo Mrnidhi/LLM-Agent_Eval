@@ -26,9 +26,11 @@ def run_evaluation_ds(agent_class: Type, agent_config: dict, evaluation_dataset_
     df = pd.read_json(evaluation_dataset_path, lines=True)
     outputs = []
     for _, row in df.iterrows():
+        # New agent instance per row to avoid session state leaking between test cases
         agent_instance = agent_class(agent_config)
         output = agent_instance(row["session_id"], row["question"])
         outputs.append(output)
+    # Column name "outputs.output" is expected by the evaluation metrics functions
     df["outputs.output"] = outputs
 
     if dump_output:
@@ -36,6 +38,7 @@ def run_evaluation_ds(agent_class: Type, agent_config: dict, evaluation_dataset_
     return df
 
 
+# Retries handle transient Azure OpenAI throttling (429) and timeout errors
 @retry(stop=stop_after_attempt(5), wait=wait_exponential(multiplier=1, min=2), retry=retry_if_exception_type(Exception))
 def run_evaluation_ds_with_retry(agent_class, agent_config, evaluation_dataset, dump_output=False):
     return run_evaluation_ds(agent_class, agent_config, evaluation_dataset, dump_output=dump_output)
@@ -74,6 +77,7 @@ def run_and_eval_flow(agent_class: Type, eval_fn: Callable, agent_config_file_di
 
 
 def multi_variant_evaluation(agent_class: Type, eval_fn: Callable, variants_path: str, evaluation_dataset: str):
+    """Evaluates all .yaml config files in variants_path in parallel (max 5 threads)."""
     project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     multi_config_path = os.path.join(project_root, variants_path)
 

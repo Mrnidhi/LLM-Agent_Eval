@@ -13,8 +13,10 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
 
 def configure_tracing(collection_name: str = "llm-eval"):
+    """Initialize OpenTelemetry tracing. Safe to call multiple times -- only sets up once."""
     settings.tracing_implementation = "opentelemetry"
 
+    # Only initialize once; subsequent calls just return the existing tracer
     if not isinstance(trace.get_tracer_provider(), TracerProvider):
         connection_string = os.getenv("APPLICATIONINSIGHTS_CONNECTION_STRING")
         if not connection_string:
@@ -57,6 +59,7 @@ def configure_logging():
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
 
+    # Suppress noisy Azure SDK and OpenTelemetry internal logs
     logging.getLogger("azure").setLevel(logging.WARNING)
     logging.getLogger("azure.core").setLevel(logging.WARNING)
     logging.getLogger("azure.core.pipeline").setLevel(logging.WARNING)

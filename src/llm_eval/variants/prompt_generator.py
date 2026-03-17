@@ -60,8 +60,10 @@ class PromptGenerator:
         return agent_config["AgentConfiguration"][prompt_attribute_name]
 
     def generate_prompts(self, prompt: str, evaluation_dataset: pd.DataFrame) -> dict:
+        """Uses LLM to create improved prompt variants based on the current prompt and eval results."""
         logger.info("Generating prompt variants")
         with tracer.start_as_current_span("PromptGenerator.generate_prompts") as span:
+            # system_prompt in the config contains instructions for the LLM on how to generate better prompts
             prompt_template = PromptTemplate.from_template(self.agent_config["AgentConfiguration"]["system_prompt"])
             span.set_attribute("prompt", prompt)
             chain = prompt_template | self.aimodel.llm().with_structured_output(PromptGeneratorOutput)

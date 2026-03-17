@@ -14,6 +14,7 @@ def load_agent_configuration(agent_folder: str, agent_config_file: str) -> dict:
     if not agent_folder or not agent_config_file:
         raise ValueError("Agent folder and agent config file are required.")
 
+    # Resolves relative to project root (two levels up from src/llm_eval/)
     project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     config_path = os.path.join(project_root, agent_folder, agent_config_file)
 

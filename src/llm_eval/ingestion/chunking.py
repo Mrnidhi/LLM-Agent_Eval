@@ -17,6 +17,7 @@ load_dotenv()
 
 
 def process_document(doc_path, docintel_env, mode="markdown"):
+    """Converts a PDF to markdown via Document Intelligence, then splits on headers."""
     loader = AzureAIDocumentIntelligenceLoader(
         file_path=doc_path,
         api_key=docintel_env["doc_intelligence_key"],
@@ -27,6 +28,7 @@ def process_document(doc_path, docintel_env, mode="markdown"):
     )
     docs = loader.load()
 
+    # Split by H1/H2/H3 headers; add more levels here if your docs use deeper nesting
     headers_to_split_on = [
         ("#", "Header 1"),
         ("##", "Header 2"),

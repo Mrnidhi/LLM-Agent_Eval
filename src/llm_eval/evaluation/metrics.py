@@ -15,6 +15,8 @@ load_dotenv()
 
 logger = configure_logging()
 
+# Uses a separate deployment for evaluation (LLM-as-judge) to avoid rate-limit conflicts
+# with the agent's own model. Set AZURE_OPENAI_KEY_EVALUATION and related vars in .env
 model_config = {
     "azure_endpoint": os.getenv("AZURE_OPENAI_EVALUATION_ENDPOINT"),
     "api_key": os.getenv("AZURE_OPENAI_KEY_EVALUATION"),
@@ -30,6 +32,7 @@ evaluators = {
 }
 
 
+# Each evaluator returns a dict; the score key is prefixed with "gpt_" by the Azure SDK
 def relevance(row):
     return evaluators["relevance"](
         response=row["outputs.output"], context=row["context"], query=row["question"]
@@ -75,6 +78,8 @@ def calculate_overall_score(scores):
 
 
 def eval_batch(batch_output: pd.DataFrame, dump_output: bool = False):
+    """Expects a DataFrame with columns: question, answer, context, outputs.output.
+    Returns (detailed_results_df, aggregated_metrics_df)."""
     results = []
     scores = {key: [] for key in evaluator_funcs}
 
